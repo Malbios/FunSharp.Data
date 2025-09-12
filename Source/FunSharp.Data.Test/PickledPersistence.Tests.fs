@@ -27,23 +27,18 @@ type MyDU =
 [<Trait("Category", "Standard")>]
 module ``PickledPersistence Tests`` =
     
-    let createPersistence(databaseFilePath: string) =
+    let createPersistence(databaseName: string) =
         
-        if File.Exists databaseFilePath then File.Delete databaseFilePath
-        new PickledPersistence(databaseFilePath) :> IPersistence
-    
-    [<Fact>]
-    let ``FindAll() for new database should return no items`` () =
-    
-        // Arrange
-        let persistence = createPersistence("test.db")
-        
-        // Act
-        let result = persistence.FindAll<MyDU> "test"
-        
-        // Assert
-        %result.Should().BeEmpty()
-        persistence.Dispose()
+        [
+            $"{databaseName}.db"
+            $"{databaseName}-log.db"
+        ]
+        |> List.iter (fun x ->
+            if File.Exists x then
+                File.Delete x
+        )
+            
+        new PickledPersistence($"{databaseName}.db") :> IPersistence
         
     [<Fact>]
     let ``Find() after inserting an item should return that item`` () =
@@ -57,12 +52,12 @@ module ``PickledPersistence Tests`` =
             Number = 123
         }
         
-        let persistence = createPersistence("test.db")
+        let persistence = createPersistence("testDatabase")
         
-        %persistence.Insert("test", id, testItem)
+        %persistence.Insert("testCollection", id, testItem)
         
         // Act
-        let result = persistence.Find("test", id)
+        let result = persistence.Find("testCollection", id)
         
         // Assert
         %result.Should().BeSome()
@@ -70,7 +65,42 @@ module ``PickledPersistence Tests`` =
         persistence.Dispose()
         
     [<Fact>]
-    let ``GetAll() after inserting an item should return a single-item collection with that item`` () =
+    let ``FindAny() with one match returns an array with one item`` () =
+    
+        // Arrange
+        let testItem : TestModelA = {
+            Id = Guid.Parse "44b8ae0d-37b3-4be3-8992-e7f6832b472a"
+            Text = "abc"
+            Number = 123
+        }
+        
+        let persistence = createPersistence("testDatabase")
+        
+        %persistence.Insert("testCollection", testItem.Id, testItem)
+        
+        // Act
+        let result = persistence.FindAny<TestModelA>("testCollection", (fun x -> x.Text = "abc"))
+        
+        // Assert
+        %result.Should().HaveLength(1)
+        %result[0].Should().Be(testItem)
+        persistence.Dispose()
+    
+    [<Fact>]
+    let ``FindAll() for new database should return no items`` () =
+    
+        // Arrange
+        let persistence = createPersistence("testDatabase")
+        
+        // Act
+        let result = persistence.FindAll<MyDU>("testCollection")
+        
+        // Assert
+        %result.Should().BeEmpty()
+        persistence.Dispose()
+        
+    [<Fact>]
+    let ``FindAll() after inserting an item should return a single-item collection with that item`` () =
     
         // Arrange
         let id = Guid.Parse "44b8ae0d-37b3-4be3-8992-e7f6832b472a"
@@ -81,12 +111,12 @@ module ``PickledPersistence Tests`` =
             Timestamp = DateTimeOffset(2023, 12, 25, 15, 30, 0, TimeSpan.FromHours(-5.0))
         }
         
-        let persistence = createPersistence("test.db")
+        let persistence = createPersistence("testDatabase")
         
-        %persistence.Upsert("test", id, testItem)
+        %persistence.Upsert("testCollection", id, testItem)
         
         // Act
-        let result = persistence.FindAll("test")
+        let result = persistence.FindAll("testCollection")
         
         // Assert
         %result.Should().HaveLength(1)

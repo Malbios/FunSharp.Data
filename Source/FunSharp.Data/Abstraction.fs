@@ -23,6 +23,9 @@ module Abstraction =
         abstract member Find<'Key, 'Value when 'Value : not struct and 'Value : equality and 'Value: not null>
             : string * 'Key -> 'Value option
             
+        abstract member FindAny<'Value when 'Value : not struct and 'Value : equality and 'Value: not null>
+            : string * ('Value -> bool) -> 'Value array
+            
         abstract member FindAll<'Value when 'Value : not struct and 'Value : equality and 'Value: not null>
             : string -> 'Value array
             

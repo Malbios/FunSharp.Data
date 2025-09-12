@@ -35,7 +35,13 @@ type LiteDbPersistence(databaseFilePath: string) =
         (collectionName, key: 'Key) : 'Value option =
             mapper.EnsureRecord<'Value>() |> ignore
             withCollection collectionName (fun collection -> collection.FindById(BsonValue(key)) |> Option.ofObj)
-        
+            
+    member _.FindAny<'Value when 'Value : not struct and 'Value : equality and 'Value : not null>
+        (collectionName, query) : 'Value array =
+            mapper.EnsureRecord<'Value>() |> ignore
+            let expr = BsonExpression.Create(query)
+            withCollection collectionName (fun collection -> collection.Find(expr) |> Seq.toArray)
+
     member _.FindAll<'Value when 'Value : not struct and 'Value : equality and 'Value : not null>
         collectionName : 'Value array =
             mapper.EnsureRecord<'Value>() |> ignore
