@@ -5,6 +5,7 @@ open LiteDB
 open MBrace.FsPickler
 open FunSharp.Data.Abstraction
 
+// TODO: make key ToString() so external doesn't need to know that
 type PickledPersistence(databaseFilePath: string) =
     
     let pickler = FsPickler.CreateBinarySerializer()
