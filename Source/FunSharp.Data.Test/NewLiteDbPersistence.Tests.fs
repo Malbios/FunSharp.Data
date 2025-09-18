@@ -87,6 +87,50 @@ module ``NewLiteDbPersistence Tests`` =
         %(result |> Array.head).Should().Be(testItem)
         
     [<Fact>]
+    let ``Can store and retrieve items with option - some`` () =
+    
+        // Arrange
+        let testItem = {
+            Id = Guid.Parse "44b8ae0d-37b3-4be3-8992-e7f6832b472a"
+            Age = Some 134
+        }
+        
+        let id = testItem.Id
+        
+        use persistence = Helpers.createNewLiteDbPersistence("testDatabase")
+        
+        %persistence.Insert("testCollection", id, testItem)
+        
+        // Act
+        let result = persistence.FindAll("testCollection")
+        
+        // Assert
+        %result.Should().HaveLength(1)
+        %(result |> Array.head).Should().Be(testItem)
+        
+    [<Fact>]
+    let ``Can store and retrieve items with option - none`` () =
+    
+        // Arrange
+        let testItem = {
+            Id = Guid.Parse "44b8ae0d-37b3-4be3-8992-e7f6832b472a"
+            Age = None
+        }
+        
+        let id = testItem.Id
+        
+        use persistence = Helpers.createNewLiteDbPersistence("testDatabase")
+        
+        %persistence.Insert("testCollection", id, testItem)
+        
+        // Act
+        let result = persistence.FindAll("testCollection")
+        
+        // Assert
+        %result.Should().HaveLength(1)
+        %(result |> Array.head).Should().Be(testItem)
+        
+    [<Fact>]
     let ``Can store and retrieve DU - simple`` () =
     
         // Arrange

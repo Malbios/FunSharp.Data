@@ -17,6 +17,11 @@ type TestDU =
     | CaseString of string
     | CaseTuple of int * string
     | CaseComplex of TestModel
+    
+type TestModelWithOption = {
+    Id: Guid
+    Age: int option
+}
 
 [<RequireQualifiedAccess>]
 module Helpers =
