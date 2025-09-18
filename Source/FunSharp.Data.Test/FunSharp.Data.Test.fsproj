@@ -7,8 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Helpers.fs" />
         <Compile Include="LiteDbPersistence.Tests.fs" />
         <Compile Include="PickledPersistence.Tests.fs" />
+        <Compile Include="NewLiteDbPersistence.Tests.fs" />
         <Compile Include="Program.fs"/>
     </ItemGroup>
 
@@ -21,6 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\FunSharp.Common\Source\FunSharp.Common\FunSharp.Common.fsproj" />
       <ProjectReference Include="..\FunSharp.Data\FunSharp.Data.fsproj" />
     </ItemGroup>
 

@@ -1,12 +1,9 @@
 ﻿namespace FunSharp.Data.Test
 
 open System
-open System.IO
 open Xunit
 open Faqt
 open Faqt.Operators
-open FunSharp.Data
-open FunSharp.Data.Abstraction
 
 type TestModelA = {
     Id: Guid
@@ -27,19 +24,6 @@ type MyDU =
 [<Trait("Category", "Standard")>]
 module ``PickledPersistence Tests`` =
     
-    let createPersistence(databaseName: string) =
-        
-        [
-            $"{databaseName}.db"
-            $"{databaseName}-log.db"
-        ]
-        |> List.iter (fun x ->
-            if File.Exists x then
-                File.Delete x
-        )
-            
-        new PickledPersistence($"{databaseName}.db") :> IPersistence
-        
     [<Fact>]
     let ``Find() after inserting an item should return that item`` () =
     
@@ -52,7 +36,7 @@ module ``PickledPersistence Tests`` =
             Number = 123
         }
         
-        let persistence = createPersistence("testDatabase")
+        use persistence = Helpers.createPickledPersistence("testDatabase")
         
         %persistence.Insert("testCollection", id, testItem)
         
@@ -62,7 +46,6 @@ module ``PickledPersistence Tests`` =
         // Assert
         %result.Should().BeSome()
         %result.Value.Should().Be(testItem)
-        persistence.Dispose()
         
     [<Fact>]
     let ``FindAny() with one match returns an array with one item`` () =
@@ -74,7 +57,7 @@ module ``PickledPersistence Tests`` =
             Number = 123
         }
         
-        let persistence = createPersistence("testDatabase")
+        use persistence = Helpers.createPickledPersistence("testDatabase")
         
         %persistence.Insert("testCollection", testItem.Id, testItem)
         
@@ -84,20 +67,18 @@ module ``PickledPersistence Tests`` =
         // Assert
         %result.Should().HaveLength(1)
         %result[0].Should().Be(testItem)
-        persistence.Dispose()
     
     [<Fact>]
     let ``FindAll() for new database should return no items`` () =
     
         // Arrange
-        let persistence = createPersistence("testDatabase")
+        use persistence = Helpers.createPickledPersistence("testDatabase")
         
         // Act
         let result = persistence.FindAll<MyDU>("testCollection")
         
         // Assert
         %result.Should().BeEmpty()
-        persistence.Dispose()
         
     [<Fact>]
     let ``FindAll() after inserting an item should return a single-item collection with that item`` () =
@@ -111,7 +92,7 @@ module ``PickledPersistence Tests`` =
             Timestamp = DateTimeOffset(2023, 12, 25, 15, 30, 0, TimeSpan.FromHours(-5.0))
         }
         
-        let persistence = createPersistence("testDatabase")
+        use persistence = Helpers.createPickledPersistence("testDatabase")
         
         %persistence.Upsert("testCollection", id, testItem)
         
@@ -121,4 +102,3 @@ module ``PickledPersistence Tests`` =
         // Assert
         %result.Should().HaveLength(1)
         %(result |> Array.head).Should().Be(testItem)
-        persistence.Dispose()

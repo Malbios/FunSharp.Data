@@ -10,6 +10,7 @@
         <Compile Include="FSharpBsonMapper.fs"/>
         <Compile Include="LiteDbPersistence.fs"/>
         <Compile Include="PickledPersistence.fs"/>
+        <Compile Include="NewLiteDbPersistence.fs" />
     </ItemGroup>
 
     <ItemGroup>
